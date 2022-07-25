@@ -1,82 +1,46 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
-	"io/ioutil"
+	"go_gui/data"
 	"log"
 )
 
-type MovieResults struct {
-	Results []Movie `json:"results"`
-}
-
-type Movie struct {
-	Title string  `json:"title"`
-	Score float64 `json:"vote_average"`
-}
-
-func LoadData() (MovieResults, error) {
-	data, err := ioutil.ReadFile("./data.json")
-	if err != nil {
-		return MovieResults{}, err
-	}
-	if json.Valid(data) == false {
-		log.Fatal("JSON file isn't valid")
-	}
-	var Movies MovieResults
-	err = json.Unmarshal(data, &Movies)
-	if err != nil {
-		return MovieResults{}, err
-	}
-
-	return Movies, nil
-}
-
-type Page struct {
-	Page int `json:"page"`
-}
-
-func LoadPage() (Page, error) {
-	var page Page
-	data, err := ioutil.ReadFile("./data.json")
-	if err != nil {
-		return Page{}, err
-	}
-	if json.Valid(data) == false {
-		log.Fatal("JSON file isn't valid")
-	}
-
-	err = json.Unmarshal(data, &page)
-	if err != nil {
-		return Page{}, err
-	}
-
-	return page, nil
-}
-
 func main() {
-	movies, err := LoadData()
+	movies, err := data.LoadData()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, movie := range movies.Results {
-		fmt.Printf("%+v\n", movie)
-	}
-
 	a := app.New()
-	w := a.NewWindow("Hello")
+	w := a.NewWindow("List of most popular movies")
+	w.Resize(fyne.NewSize(600, 400))
 
-	hello := widget.NewLabel("Hello Fyne!")
-	w.SetContent(container.NewVBox(
-		hello,
-		widget.NewButton("Hi!", func() {
-			hello.SetText("Welcome :)")
-		}),
+	list := widget.NewList(
+		func() int {
+			return len(movies.Results)
+		},
+		func() fyne.CanvasObject {
+			return widget.NewLabel("template")
+		},
+		func(id widget.ListItemID, object fyne.CanvasObject) {
+			object.(*widget.Label).SetText(movies.Results[id].Title)
+		},
+	)
+
+	//list.OnSelected = func(id widget.ListItemID) {
+	//	widget.NewLabel()
+	//}
+
+	welcomeText := widget.NewLabel("Select movie")
+	welcomeText.Alignment = fyne.TextAlignCenter
+
+	w.SetContent(container.NewHSplit(
+		list,
+		container.NewMax(welcomeText),
 	))
 
 	w.ShowAndRun()
