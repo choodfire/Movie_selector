@@ -1,13 +1,44 @@
 package main
 
 import (
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"go_gui/data"
+	"io"
 	"log"
+	"net/http"
+	"os"
 )
+
+func savePoster(link string) error {
+	err := os.Mkdir("temp", 0750)
+	if err != nil {
+		return err
+	}
+	fileURL := fmt.Sprintf("https://image.tmdb.org/t/p/w500%s", link)
+	filePath := fmt.Sprintf("temp%s", link)
+	img, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer img.Close()
+
+	resp, err := http.Get(fileURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	_, err = io.Copy(img, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func main() {
 	movies, err := data.LoadData()
@@ -31,16 +62,17 @@ func main() {
 		},
 	)
 
-	//list.OnSelected = func(id widget.ListItemID) {
-	//	widget.NewLabel()
-	//}
+	pageText := widget.NewLabel("Select movie")
+	pageText.Alignment = fyne.TextAlignCenter
+	pageText.Wrapping = fyne.TextWrapWord
 
-	welcomeText := widget.NewLabel("Select movie")
-	welcomeText.Alignment = fyne.TextAlignCenter
+	list.OnSelected = func(id widget.ListItemID) {
+		pageText.SetText(movies.Results[id].Description)
+	}
 
 	w.SetContent(container.NewHSplit(
 		list,
-		container.NewMax(welcomeText),
+		container.NewMax(pageText),
 	))
 
 	w.ShowAndRun()
