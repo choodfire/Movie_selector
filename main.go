@@ -67,6 +67,10 @@ func main() {
 	pageText.Wrapping = fyne.TextWrapWord
 
 	list.OnSelected = func(id widget.ListItemID) {
+		err := savePoster(movies.Results[id].PosterPath)
+		if err != nil {
+			log.Fatal(err)
+		}
 		pageText.SetText(movies.Results[id].Description)
 	}
 
