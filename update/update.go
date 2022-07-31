@@ -28,5 +28,6 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Println("test")
 	fmt.Println(string(body))
 }
