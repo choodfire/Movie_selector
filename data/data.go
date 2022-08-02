@@ -7,14 +7,14 @@ import (
 )
 
 type MovieResults struct {
-	Results []Movie `json:"results"`
+	Results []Movie `json:"films"`
 }
 
 type Movie struct {
-	Title       string  `json:"title"`
-	Score       float64 `json:"vote_average"`
-	Description string  `json:"overview"`
-	PosterPath  string  `json:"poster_path"`
+	Title string `json:"nameRu"`
+	Score string `json:"rating"`
+	//Description string  `json:"overview"`
+	PosterPath string `json:"posterUrl"`
 }
 
 func LoadData() (MovieResults, error) {

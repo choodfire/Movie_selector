@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"go_gui/data"
+	"go_gui/update"
 	"io"
 	"log"
 	"net/http"
@@ -32,6 +33,9 @@ func savePoster(link string) error {
 	}
 	defer resp.Body.Close()
 
+	if err != nil {
+		log.Fatal(err)
+	}
 	_, err = io.Copy(img, resp.Body)
 	if err != nil {
 		return err
@@ -41,6 +45,11 @@ func savePoster(link string) error {
 }
 
 func main() {
+	err := update.Update()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	movies, err := data.LoadData()
 	if err != nil {
 		log.Fatal(err)
@@ -71,7 +80,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		pageText.SetText(movies.Results[id].Description)
+		//pageText.SetText(movies.Results[id].Description)
 	}
 
 	w.SetContent(container.NewHSplit(
