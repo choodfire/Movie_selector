@@ -14,6 +14,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = data.SavePosters(movies)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	a := app.New()
 	w := a.NewWindow("List of most popular movies")

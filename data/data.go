@@ -3,8 +3,11 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"sync"
 )
 
 type MovieResults struct {
@@ -55,70 +58,63 @@ func Update() (MovieResults, error) {
 
 		movies.addItems(temp)
 	}
+
 	return movies, nil
 }
 
-//func LoadData() (MovieResults, error) {
-//	data, err := ioutil.ReadFile("./data.json")
-//	if err != nil {
-//		return MovieResults{}, err
-//	}
-//	if json.Valid(data) == false {
-//		log.Fatal("JSON file isn't valid")
-//	}
-//	var Movies MovieResults
-//	err = json.Unmarshal(data, &Movies)
-//	if err != nil {
-//		return MovieResults{}, err
-//	}
-//
-//	err = savePosters(Movies)
-//	if err != nil {
-//		return MovieResults{}, err
-//	}
-//
-//	return Movies, nil
-//}
-//
-//func savePosters(movies MovieResults) error {
-//	if _, err := os.Stat("temp"); os.IsNotExist(err) {
-//		err := os.Mkdir("temp", 0777)
-//		if err != nil {
-//			return err
-//		}
-//	}
-//
-//	wg := sync.WaitGroup{}
-//	ch := make(chan error)
-//
-//	for _, movie := range movies.Results {
-//		wg.Add(1)
-//		movie := movie
-//		go func() {
-//			filePath := fmt.Sprintf("temp/%d.jpg", movie.FilmId)
-//			img, err := os.Create(filePath)
-//			if err != nil {
-//				//return err
-//				ch <- err
-//			}
-//			defer img.Close()
-//
-//			resp, err := http.Get(movie.PosterPath)
-//			if err != nil {
-//				//return err
-//				ch <- err
-//			}
-//			defer resp.Body.Close()
-//
-//			_, err = io.Copy(img, resp.Body)
-//			if err != nil {
-//				//return err
-//				ch <- err
-//			}
-//			wg.Done()
-//		}()
-//	}
-//	wg.Wait()
-//
-//	return <-ch
-//}
+func SavePosters(movies MovieResults) error {
+	if _, err := os.Stat("temp"); os.IsNotExist(err) {
+		err := os.Mkdir("temp", 0777)
+		if err != nil {
+			return err
+		}
+	}
+
+	wg := sync.WaitGroup{}
+	ch := make(chan error)
+
+	for i, movie := range movies.Results {
+		wg.Add(1)
+		movie := movie
+		i := i
+		go func() {
+			fmt.Println(i, "started")
+			filePath := fmt.Sprintf("temp/%d.jpg", movie.FilmId)
+			if _, err := os.Stat(filePath); !os.IsNotExist(err) {
+				wg.Done()
+				fmt.Println(i, "returned")
+				return
+			}
+
+			img, err := os.Create(filePath)
+			if err != nil {
+				//return err
+				ch <- err
+			}
+			defer img.Close()
+
+			resp, err := http.Get(movie.PosterPath)
+			if err != nil {
+				//return err
+				ch <- err
+			}
+			defer resp.Body.Close()
+
+			_, err = io.Copy(img, resp.Body)
+			if err != nil {
+				//return err
+				ch <- err
+			}
+			fmt.Println(i, "saved")
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+
+	select {
+	case err := <-ch:
+		return err
+	default:
+		return nil
+	}
+}
