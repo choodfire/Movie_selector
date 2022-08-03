@@ -1,56 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"go_gui/data"
-	"go_gui/update"
-	"io"
 	"log"
-	"net/http"
-	"os"
 )
 
-func savePoster(link string) error {
-	err := os.Mkdir("temp", 0750)
-	if err != nil {
-		return err
-	}
-	fileURL := fmt.Sprintf("https://image.tmdb.org/t/p/w500%s", link)
-	filePath := fmt.Sprintf("temp%s", link)
-	img, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer img.Close()
-
-	resp, err := http.Get(fileURL)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = io.Copy(img, resp.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func main() {
-	err := update.Update()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	movies, err := data.LoadData()
+	movies, err := data.Update()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,11 +36,7 @@ func main() {
 	pageText.Wrapping = fyne.TextWrapWord
 
 	list.OnSelected = func(id widget.ListItemID) {
-		err := savePoster(movies.Results[id].PosterPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-		//pageText.SetText(movies.Results[id].Description)
+		// photo and description
 	}
 
 	w.SetContent(container.NewHSplit(
