@@ -73,16 +73,13 @@ func SavePosters(movies MovieResults) error {
 	wg := sync.WaitGroup{}
 	ch := make(chan error)
 
-	for i, movie := range movies.Results {
+	for _, movie := range movies.Results {
 		wg.Add(1)
 		movie := movie
-		i := i
 		go func() {
-			fmt.Println(i, "started")
 			filePath := fmt.Sprintf("temp/%d.jpg", movie.FilmId)
 			if _, err := os.Stat(filePath); !os.IsNotExist(err) {
 				wg.Done()
-				fmt.Println(i, "returned")
 				return
 			}
 
@@ -105,7 +102,6 @@ func SavePosters(movies MovieResults) error {
 				//return err
 				ch <- err
 			}
-			fmt.Println(i, "saved")
 			wg.Done()
 		}()
 	}
