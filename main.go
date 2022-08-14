@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"go_gui/data"
-	"log"
-)
+	"image/color"
 
-func updateWindow(w fyne.Window, list fyne.CanvasObject, cntnr fyne.CanvasObject) {
-	w.SetContent(container.NewHSplit(list, cntnr))
-}
+	//"image/color"
+	"log"
+
+	"fyne.io/fyne/v2/canvas"
+)
 
 func main() {
 	movies, err := data.Update()
@@ -48,22 +48,28 @@ func main() {
 	//image := canvas.NewImageFromFile(fmt.Sprintf("./temp/%d.jpg", movies.Results[11].FilmId))
 	//cntnr := container.NewMax(image, pageText)
 
-	cntnr := container.NewMax(pageText)
-
 	list.OnSelected = func(id widget.ListItemID) {
-		image := canvas.NewImageFromFile(fmt.Sprintf("./temp/%d.jpg", movies.Results[id].FilmId))
-		image.FillMode = canvas.ImageFillOriginal
+		img := canvas.NewImageFromFile(fmt.Sprintf("./temp/%d.jpg", movies.Results[id].FilmId))
+		img.FillMode = canvas.ImageFillContain
+		img.Resize(fyne.Size{300, 300})
+		img.Move(fyne.Position{50, 10})
 
-		pageText.SetText(fmt.Sprintf("%s\n%s", movies.Results[id].Title, movies.Results[id].Score))
+		text := canvas.NewText("Overlay", color.White)
+		text.Resize(fyne.Size{100, 130})
+		text.Move(fyne.Position{50, 120})
 
-		cntnr := container.NewMax(image, pageText)
-		cntnr.Refresh()
-		fmt.Println("cntnr changed")
+		cntnr := container.NewWithoutLayout(img, text)
+		//cntnr := container.NewGridWithRows(2, img, text)
 
-		updateWindow(w, list, cntnr)
+		w.SetContent(container.NewHSplit(list, cntnr))
 	}
 
-	updateWindow(w, list, cntnr)
+	w.SetContent(container.NewHSplit(list, container.NewMax(pageText)))
 
 	w.ShowAndRun()
 }
+
+// 		image := canvas.NewImageFromFile(fmt.Sprintf("./temp/%d.jpg", movies.Results[id].FilmId))
+//		image.FillMode = canvas.ImageFillOriginal
+//		image.Resize(fyne.NewSize(200, 200))
+//		content := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), image, layout.NewSpacer())
