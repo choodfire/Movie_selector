@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"go_gui/data"
 	"image/color"
+	"strconv"
 
 	//"image/color"
 	"log"
@@ -45,27 +46,31 @@ func main() {
 	pageText.Alignment = fyne.TextAlignCenter
 	pageText.Wrapping = fyne.TextWrapWord
 
-	//image := canvas.NewImageFromFile(fmt.Sprintf("./temp/%d.jpg", movies.Results[11].FilmId))
-	//cntnr := container.NewMax(image, pageText)
-
 	list.OnSelected = func(id widget.ListItemID) {
 		img := canvas.NewImageFromFile(fmt.Sprintf("./temp/%d.jpg", movies.Results[id].FilmId))
 		img.FillMode = canvas.ImageFillContain
-		img.Resize(fyne.Size{300, 300})
+		img.Resize(fyne.Size{300, 400})
 		img.Move(fyne.Position{50, 10})
 
 		text := canvas.NewText(movies.Results[id].Title, color.White)
 		text.Resize(fyne.Size{400, 130})
-		text.Move(fyne.Position{0, 270})
+		text.Move(fyne.Position{0, 370})
 		text.Alignment = fyne.TextAlignCenter
 
 		score := canvas.NewText(movies.Results[id].Score, color.White)
 		score.Resize(fyne.Size{400, 130})
-		score.Move(fyne.Position{0, 290})
+		score.Move(fyne.Position{0, 390})
 		score.Alignment = fyne.TextAlignCenter
+		scoreInt, _ := strconv.ParseFloat(movies.Results[id].Score, 64)
+		if scoreInt < 5.0 {
+			score.Color = color.RGBA{255, 0, 0, 255}
+		} else if scoreInt > 7.0 {
+			score.Color = color.RGBA{0, 255, 0, 255}
+		} else {
+			score.Color = color.RGBA{128, 128, 128, 255}
+		}
 
 		cntnr := container.NewWithoutLayout(img, text, score)
-		//cntnr := container.NewGridWithRows(2, img, text)
 
 		w.SetContent(container.NewHSplit(list, cntnr))
 	}
@@ -75,7 +80,4 @@ func main() {
 	w.ShowAndRun()
 }
 
-// 		image := canvas.NewImageFromFile(fmt.Sprintf("./temp/%d.jpg", movies.Results[id].FilmId))
-//		image.FillMode = canvas.ImageFillOriginal
-//		image.Resize(fyne.NewSize(200, 200))
-//		content := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), image, layout.NewSpacer())
+// при ресайзе изменять длину и локацию картинки и текста
