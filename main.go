@@ -54,11 +54,17 @@ func main() {
 		img.Resize(fyne.Size{300, 300})
 		img.Move(fyne.Position{50, 10})
 
-		text := canvas.NewText("Overlay", color.White)
-		text.Resize(fyne.Size{100, 130})
-		text.Move(fyne.Position{50, 120})
+		text := canvas.NewText(movies.Results[id].Title, color.White)
+		text.Resize(fyne.Size{400, 130})
+		text.Move(fyne.Position{0, 270})
+		text.Alignment = fyne.TextAlignCenter
 
-		cntnr := container.NewWithoutLayout(img, text)
+		score := canvas.NewText(movies.Results[id].Score, color.White)
+		score.Resize(fyne.Size{400, 130})
+		score.Move(fyne.Position{0, 290})
+		score.Alignment = fyne.TextAlignCenter
+
+		cntnr := container.NewWithoutLayout(img, text, score)
 		//cntnr := container.NewGridWithRows(2, img, text)
 
 		w.SetContent(container.NewHSplit(list, cntnr))
