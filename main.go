@@ -86,3 +86,15 @@ func main() {
 }
 
 // todo при ресайзе изменять длину и локацию картинки и текста
+
+//		//textDescription := canvas.NewText(movies.Results[id].Description, color.White)
+//		//textDescription.Resize(fyne.Size{400, 130})
+//		//textDescription.Move(fyne.Position{0, 410})
+//		//textDescription.Alignment = fyne.TextAlignCenter
+//		//textDescription.Wrapping = fyne.TextWrapWord
+//
+//		//textDescription := widget.NewLabel(movies.Results[id].Description)
+//		//textDescription.Resize(fyne.Size{400, 130})
+//		//textDescription.Move(fyne.Position{0, 410})
+//		//textDescription.Alignment = fyne.TextAlignCenter
+//		//textDescription.Wrapping = fyne.TextWrapWord
