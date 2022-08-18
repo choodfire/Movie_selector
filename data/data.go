@@ -19,14 +19,22 @@ func (current *MovieResults) addItems(other MovieResults) {
 }
 
 type Movie struct {
-	Title      string `json:"nameRu"`
-	Score      string `json:"rating"`
-	FilmId     int    `json:"filmId"`
-	PosterPath string `json:"posterUrl"`
-	//Description string  `json:"overview"`
+	Title       string `json:"nameRu"`
+	Score       string `json:"rating"`
+	FilmId      int    `json:"filmId"`
+	PosterPath  string `json:"posterUrl"`
+	Description string `json:"description"`
 }
 
-func Update() (MovieResults, error) {
+//func (m *Movie) getDescription() string  {
+//	return m.Description
+//}
+//
+//func (m *Movie) getShortDescription() string  {
+//	return m.ShortDescription
+//}
+
+func UpdateMovieList() (MovieResults, error) {
 	var movies MovieResults
 	for page := 1; page < 6; page++ {
 		link := fmt.Sprintf("https://kinopoiskapiunofficial.tech/api/v2.2/films/top?type=TOP_100_POPULAR_FILMS&page=%d", page)
@@ -113,4 +121,45 @@ func SavePosters(movies MovieResults) error {
 	default:
 		return nil
 	}
+}
+
+func GetDescriptions(movies *MovieResults) error {
+	// 	curl -X 'GET' \
+	//  'https://kinopoiskapiunofficial.tech/api/v2.2/films/123' \
+	//  -H 'accept: application/json' \
+	//  -H 'X-API-KEY: 22cd9319-2dd0-4d4d-b446-c98d6c5833f2'
+
+	for i := 0; i < len(movies.Results); i++ {
+		link := fmt.Sprintf("https://kinopoiskapiunofficial.tech/api/v2.2/films/%d", movies.Results[i].FilmId)
+		req, err := http.NewRequest("GET", link, nil)
+		if err != nil {
+			return err
+		}
+
+		req.Header.Set("Accept", "application/json")
+		req.Header.Set("X-Api-Key", api)
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+
+		if err != nil {
+			return err
+		}
+
+		var temp Movie
+		err = json.Unmarshal([]byte(string(body)), &temp)
+		if err != nil {
+			return err
+		}
+
+		//movie.Description = temp.Description
+		movies.Results[i].Description = temp.Description
+	}
+
+	return nil
 }

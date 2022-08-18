@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	movies, err := data.Update()
+	movies, err := data.UpdateMovieList()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -25,9 +25,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = data.GetDescriptions(&movies)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	a := app.New()
-	w := a.NewWindow("List of most popular movies")
+	w := a.NewWindow("Топ 100 самых ожидаемых фильмов")
 	w.Resize(fyne.NewSize(800, 600))
 
 	list := widget.NewList(
@@ -42,7 +46,7 @@ func main() {
 		},
 	)
 
-	pageText := widget.NewLabel("Select movie")
+	pageText := widget.NewLabel(fmt.Sprintf("%s", "Выберите фильм"))
 	pageText.Alignment = fyne.TextAlignCenter
 	pageText.Wrapping = fyne.TextWrapWord
 
@@ -61,6 +65,7 @@ func main() {
 		score.Resize(fyne.Size{400, 130})
 		score.Move(fyne.Position{0, 390})
 		score.Alignment = fyne.TextAlignCenter
+
 		scoreInt, _ := strconv.ParseFloat(movies.Results[id].Score, 64)
 		if scoreInt < 5.0 {
 			score.Color = color.RGBA{255, 0, 0, 255}
@@ -80,4 +85,4 @@ func main() {
 	w.ShowAndRun()
 }
 
-// при ресайзе изменять длину и локацию картинки и текста
+// todo при ресайзе изменять длину и локацию картинки и текста
