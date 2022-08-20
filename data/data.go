@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"sync"
@@ -25,14 +26,6 @@ type Movie struct {
 	PosterPath  string `json:"posterUrl"`
 	Description string `json:"description"`
 }
-
-//func (m *Movie) getDescription() string  {
-//	return m.Description
-//}
-//
-//func (m *Movie) getShortDescription() string  {
-//	return m.ShortDescription
-//}
 
 func UpdateMovieList() (MovieResults, error) {
 	var movies MovieResults
@@ -162,4 +155,24 @@ func GetDescriptions(movies *MovieResults) error {
 	}
 
 	return nil
+}
+
+func GetFromJSON() (MovieResults, error) {
+	data, err := ioutil.ReadFile("./data.json")
+	if err != nil {
+		return MovieResults{}, err
+	}
+
+	if json.Valid(data) == false {
+		log.Fatal("JSON file isn't valid")
+	}
+
+	var Movies MovieResults
+
+	err = json.Unmarshal(data, &Movies)
+	if err != nil {
+		return MovieResults{}, err
+	}
+
+	return Movies, nil
 }

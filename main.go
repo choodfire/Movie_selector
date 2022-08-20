@@ -21,6 +21,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	if len(movies.Results) == 0 {
+		movies, err = data.GetFromJSON()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	err = data.SavePosters(movies)
 	if err != nil {
 		log.Fatal(err)
@@ -46,7 +54,7 @@ func main() {
 		},
 	)
 
-	pageText := widget.NewLabel(fmt.Sprintf("%s", "Выберите фильм"))
+	pageText := widget.NewLabel("Выберите фильм")
 	pageText.Alignment = fyne.TextAlignCenter
 	pageText.Wrapping = fyne.TextWrapWord
 
@@ -75,7 +83,13 @@ func main() {
 			score.Color = color.RGBA{128, 128, 128, 255}
 		}
 
-		cntnr := container.NewWithoutLayout(img, text, score)
+		textDescription := widget.NewLabel(movies.Results[id].Description)
+		textDescription.Resize(fyne.Size{400, 130})
+		textDescription.Move(fyne.Position{0, 410})
+		textDescription.Alignment = fyne.TextAlignCenter
+		textDescription.Wrapping = fyne.TextWrapWord
+
+		cntnr := container.NewWithoutLayout(img, text, score, textDescription)
 
 		w.SetContent(container.NewHSplit(list, cntnr))
 	}
