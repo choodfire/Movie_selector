@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -8,6 +9,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"go_gui/data"
 	"image/color"
+	"io/ioutil"
+	"os"
 	"strconv"
 
 	//"image/color"
@@ -20,6 +23,22 @@ func main() {
 	movies, err := data.UpdateMovieList()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if len(movies.Results) == 100 {
+		if _, err := os.Stat("./data/data.json"); !os.IsNotExist(err) {
+			err := os.Remove("./data/data.json")
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		file, _ := json.MarshalIndent(movies, "", " ")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_ = ioutil.WriteFile("./data/data.json", file, 0644)
 	}
 
 	if len(movies.Results) == 0 {
