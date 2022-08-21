@@ -29,7 +29,7 @@ func SaveToJSON(movies MovieResults) error {
 }
 
 func GetFromJSON() (MovieResults, error) {
-	data, err := ioutil.ReadFile("./data.json")
+	data, err := ioutil.ReadFile("./data/data.json")
 	if err != nil {
 		return MovieResults{}, err
 	}

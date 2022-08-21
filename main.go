@@ -10,15 +10,12 @@ import (
 	"image/color"
 	"strconv"
 
-	//"image/color"
-	"log"
-
 	"fyne.io/fyne/v2/canvas"
 )
 
 func check(err error) {
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
 
@@ -39,6 +36,7 @@ func main() {
 	err = data.SavePosters(movies) // todo in goroutines if not
 	check(err)
 
+	// todo make save with descriptions
 	err = data.GetDescriptions(&movies) // todo in goroutines if not
 	check(err)
 
@@ -64,40 +62,47 @@ func main() {
 
 	list.OnSelected = func(id widget.ListItemID) {
 		img := canvas.NewImageFromFile(fmt.Sprintf("./temp/%d.jpg", movies.Results[id].FilmId))
-		img.FillMode = canvas.ImageFillContain
-		img.Resize(fyne.Size{300, 400})
-		img.Move(fyne.Position{50, 10})
+		//img.Resize(fyne.NewSize(300, 400))
+		img.SetMinSize(fyne.NewSize(300, 400))
+		//img.FillMode = canvas.ImageFillStretch
 
-		text := canvas.NewText(movies.Results[id].Title, color.White)
-		text.Resize(fyne.Size{400, 130})
-		text.Move(fyne.Position{0, 370})
-		text.Alignment = fyne.TextAlignCenter
+		textTitle := canvas.NewText(movies.Results[id].Title, color.White)
+		textTitle.Resize(fyne.Size{400, 130})
+		textTitle.Alignment = fyne.TextAlignCenter
 
-		score := canvas.NewText(movies.Results[id].Score, color.White)
-		score.Resize(fyne.Size{400, 130})
-		score.Move(fyne.Position{0, 390})
-		score.Alignment = fyne.TextAlignCenter
+		textScore := canvas.NewText(movies.Results[id].Score, color.White)
+		textScore.Resize(fyne.Size{400, 130})
+		textScore.Alignment = fyne.TextAlignCenter
 
 		scoreInt, _ := strconv.ParseFloat(movies.Results[id].Score, 64)
 		if scoreInt < 5.0 {
-			score.Color = color.RGBA{255, 0, 0, 255}
+			textScore.Color = color.RGBA{255, 0, 0, 255}
 		} else if scoreInt > 7.0 {
-			score.Color = color.RGBA{0, 255, 0, 255}
+			textScore.Color = color.RGBA{0, 255, 0, 255}
 		} else {
-			score.Color = color.RGBA{128, 128, 128, 255}
+			textScore.Color = color.RGBA{128, 128, 128, 255}
 		}
 
 		textDescription := pageText
 		textDescription.SetText(movies.Results[id].Description)
+		//textDescription.SetText("one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve")
 		textDescription.Resize(fyne.Size{400, 130})
-		textDescription.Move(fyne.Position{0, 460})
+		//textDescription.Move(fyne.Position{0, 460})
 		textDescription.Alignment = fyne.TextAlignLeading
 		textDescription.Wrapping = fyne.TextWrapWord
 		// todo add vertical scroll
 
-		cntnr := container.NewWithoutLayout(img, text, score, textDescription)
+		//cntnr := container.NewVScroll(container.NewWithoutLayout(img, textTitle, textScore, textDescription))
+		//cntnr.Direction = container.ScrollVerticalOnly
 
-		w.SetContent(container.NewHSplit(list, cntnr))
+		//cntnr := container.NewWithoutLayout(img, textTitle, textScore, textDescription)
+
+		cntnr := container.NewVScroll(container.NewVBox(img, textTitle, textScore, textDescription))
+
+		w.SetContent(container.NewHSplit(
+			list,
+			cntnr,
+		))
 	}
 
 	w.SetContent(container.NewHSplit(list, container.NewMax(pageText)))
