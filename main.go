@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -9,8 +8,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"go_gui/data"
 	"image/color"
-	"io/ioutil"
-	"os"
 	"strconv"
 
 	//"image/color"
@@ -19,43 +16,31 @@ import (
 	"fyne.io/fyne/v2/canvas"
 )
 
-func main() {
-	movies, err := data.UpdateMovieList()
+func check(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func main() {
+	movies, err := data.UpdateMovieList()
+	check(err)
 
 	if len(movies.Results) == 100 {
-		if _, err := os.Stat("./data/data.json"); !os.IsNotExist(err) {
-			err := os.Remove("./data/data.json")
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-
-		file, _ := json.MarshalIndent(movies, "", " ")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		_ = ioutil.WriteFile("./data/data.json", file, 0644)
+		err = data.SaveToJSON(movies)
+		check(err)
 	}
 
 	if len(movies.Results) == 0 {
 		movies, err = data.GetFromJSON()
-		if err != nil {
-			log.Fatal(err)
-		}
+		check(err)
 	}
 
-	err = data.SavePosters(movies)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = data.GetDescriptions(&movies)
-	if err != nil {
-		log.Fatal(err)
-	}
+	err = data.SavePosters(movies) // todo in goroutines if not
+	check(err)
+
+	err = data.GetDescriptions(&movies) // todo in goroutines if not
+	check(err)
 
 	a := app.New()
 	w := a.NewWindow("Топ 100 самых ожидаемых фильмов")
@@ -119,15 +104,4 @@ func main() {
 }
 
 // todo при ресайзе изменять длину и локацию картинки и текста
-
-//		//textDescription := canvas.NewText(movies.Results[id].Description, color.White)
-//		//textDescription.Resize(fyne.Size{400, 130})
-//		//textDescription.Move(fyne.Position{0, 410})
-//		//textDescription.Alignment = fyne.TextAlignCenter
-//		//textDescription.Wrapping = fyne.TextWrapWord
-//
-//		//textDescription := widget.NewLabel(movies.Results[id].Description)
-//		//textDescription.Resize(fyne.Size{400, 130})
-//		//textDescription.Move(fyne.Position{0, 410})
-//		//textDescription.Alignment = fyne.TextAlignCenter
-//		//textDescription.Wrapping = fyne.TextWrapWord
+// todo fix description
