@@ -87,11 +87,13 @@ func main() {
 			score.Color = color.RGBA{128, 128, 128, 255}
 		}
 
-		textDescription := widget.NewLabel(movies.Results[id].Description)
+		textDescription := pageText
+		textDescription.SetText(movies.Results[id].Description)
 		textDescription.Resize(fyne.Size{400, 130})
-		textDescription.Move(fyne.Position{0, 410})
-		textDescription.Alignment = fyne.TextAlignCenter
+		textDescription.Move(fyne.Position{0, 460})
+		textDescription.Alignment = fyne.TextAlignLeading
 		textDescription.Wrapping = fyne.TextWrapWord
+		// todo add vertical scroll
 
 		cntnr := container.NewWithoutLayout(img, text, score, textDescription)
 
