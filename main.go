@@ -23,6 +23,9 @@ func main() {
 	movies, err := data.UpdateMovieList()
 	check(err)
 
+	err = data.GetDescriptions(&movies) // todo in goroutines if not
+	check(err)
+
 	if len(movies.Results) == 100 {
 		err = data.SaveToJSON(movies)
 		check(err)
@@ -34,10 +37,6 @@ func main() {
 	}
 
 	err = data.SavePosters(movies) // todo in goroutines if not
-	check(err)
-
-	// todo make save with descriptions
-	err = data.GetDescriptions(&movies) // todo in goroutines if not
 	check(err)
 
 	a := app.New()
@@ -62,9 +61,8 @@ func main() {
 
 	list.OnSelected = func(id widget.ListItemID) {
 		img := canvas.NewImageFromFile(fmt.Sprintf("./temp/%d.jpg", movies.Results[id].FilmId))
-		//img.Resize(fyne.NewSize(300, 400))
 		img.SetMinSize(fyne.NewSize(300, 400))
-		//img.FillMode = canvas.ImageFillStretch
+		img.FillMode = canvas.ImageFillContain
 
 		textTitle := canvas.NewText(movies.Results[id].Title, color.White)
 		textTitle.Resize(fyne.Size{400, 130})
