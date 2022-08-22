@@ -116,41 +116,58 @@ func SavePosters(movies MovieResults) error {
 }
 
 func GetDescriptions(movies *MovieResults) error {
-	// 	curl -X 'GET' \
-	//  'https://kinopoiskapiunofficial.tech/api/v2.2/films/123' \
-	//  -H 'accept: application/json' \
-	//  -H 'X-API-KEY: 22cd9319-2dd0-4d4d-b446-c98d6c5833f2'
+	wg := sync.WaitGroup{}
+	ch := make(chan error)
 
 	for i := 0; i < len(movies.Results); i++ {
-		link := fmt.Sprintf("https://kinopoiskapiunofficial.tech/api/v2.2/films/%d", movies.Results[i].FilmId)
-		req, err := http.NewRequest("GET", link, nil)
-		if err != nil {
-			return err
-		}
+		wg.Add(1)
+		i := i
 
-		req.Header.Set("Accept", "application/json")
-		req.Header.Set("X-Api-Key", api)
+		go func() {
+			link := fmt.Sprintf("https://kinopoiskapiunofficial.tech/api/v2.2/films/%d", movies.Results[i].FilmId)
+			req, err := http.NewRequest("GET", link, nil)
+			if err != nil {
+				//return err
+				ch <- err
+			}
 
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
+			req.Header.Set("Accept", "application/json")
+			req.Header.Set("X-Api-Key", api)
 
-		body, err := ioutil.ReadAll(resp.Body)
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				//return err
+				ch <- err
+			}
+			defer resp.Body.Close()
 
-		if err != nil {
-			return err
-		}
+			body, err := ioutil.ReadAll(resp.Body)
 
-		var temp Movie
-		err = json.Unmarshal([]byte(string(body)), &temp)
-		if err != nil {
-			return err
-		}
+			if err != nil {
+				//return err
+				ch <- err
+			}
 
-		//movie.Description = temp.Description
-		movies.Results[i].Description = temp.Description
+			var temp Movie
+			err = json.Unmarshal([]byte(string(body)), &temp)
+			if err != nil {
+				//return err
+				ch <- err
+			}
+
+			//movie.Description = temp.Description
+			movies.Results[i].Description = temp.Description
+
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+
+	select {
+	case err := <-ch:
+		return err
+	default:
+		return nil
 	}
 
 	return nil

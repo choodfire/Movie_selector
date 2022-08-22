@@ -23,7 +23,7 @@ func main() {
 	movies, err := data.UpdateMovieList()
 	check(err)
 
-	err = data.GetDescriptions(&movies) // todo in goroutines if not
+	err = data.GetDescriptions(&movies)
 	check(err)
 
 	if len(movies.Results) == 100 {
@@ -36,7 +36,7 @@ func main() {
 		check(err)
 	}
 
-	err = data.SavePosters(movies) // todo in goroutines if not
+	err = data.SavePosters(movies)
 	check(err)
 
 	a := app.New()
@@ -83,17 +83,8 @@ func main() {
 
 		textDescription := pageText
 		textDescription.SetText(movies.Results[id].Description)
-		//textDescription.SetText("one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve one two three four five six seven eight nine ten eleven twelve")
 		textDescription.Resize(fyne.Size{400, 130})
-		//textDescription.Move(fyne.Position{0, 460})
-		textDescription.Alignment = fyne.TextAlignLeading
 		textDescription.Wrapping = fyne.TextWrapWord
-		// todo add vertical scroll
-
-		//cntnr := container.NewVScroll(container.NewWithoutLayout(img, textTitle, textScore, textDescription))
-		//cntnr.Direction = container.ScrollVerticalOnly
-
-		//cntnr := container.NewWithoutLayout(img, textTitle, textScore, textDescription)
 
 		cntnr := container.NewVScroll(container.NewVBox(img, textTitle, textScore, textDescription))
 
@@ -107,6 +98,3 @@ func main() {
 
 	w.ShowAndRun()
 }
-
-// todo при ресайзе изменять длину и локацию картинки и текста
-// todo fix description
