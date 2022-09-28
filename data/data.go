@@ -116,58 +116,37 @@ func SavePosters(movies MovieResults) error {
 }
 
 func GetDescriptions(movies *MovieResults) error {
-	wg := sync.WaitGroup{}
-	ch := make(chan error)
-
 	for i := 0; i < len(movies.Results); i++ {
-		wg.Add(1)
-		i := i
+		link := fmt.Sprintf("https://kinopoiskapiunofficial.tech/api/v2.2/films/%d", movies.Results[i].FilmId)
+		req, err := http.NewRequest("GET", link, nil)
+		if err != nil {
+			return err
+		}
 
-		go func() {
-			link := fmt.Sprintf("https://kinopoiskapiunofficial.tech/api/v2.2/films/%d", movies.Results[i].FilmId)
-			req, err := http.NewRequest("GET", link, nil)
-			if err != nil {
-				//return err
-				ch <- err
-			}
+		req.Header.Set("Accept", "application/json")
+		req.Header.Set("X-Api-Key", api)
 
-			req.Header.Set("Accept", "application/json")
-			req.Header.Set("X-Api-Key", api)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
 
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				//return err
-				ch <- err
-			}
-			defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
 
-			body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
 
-			if err != nil {
-				//return err
-				ch <- err
-			}
+		var temp Movie
+		err = json.Unmarshal([]byte(string(body)), &temp)
+		if err != nil {
+			return err
+		}
 
-			var temp Movie
-			err = json.Unmarshal([]byte(string(body)), &temp)
-			if err != nil {
-				//return err
-				ch <- err
-			}
+		//movie.Description = temp.Description
+		movies.Results[i].Description = temp.Description
 
-			//movie.Description = temp.Description
-			movies.Results[i].Description = temp.Description
-
-			wg.Done()
-		}()
-	}
-	wg.Wait()
-
-	select {
-	case err := <-ch:
-		return err
-	default:
-		return nil
 	}
 
 	return nil

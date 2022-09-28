@@ -1,3 +1,4 @@
-update/apiKey.go
+data/apiKey.go
 .idea
 data.json
+temp
