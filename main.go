@@ -32,7 +32,14 @@ func main() {
 
 	if len(movies.Results) == 0 {
 		movies, err = data.GetFromJSON()
-		check(err)
+		if err != nil {
+			a := app.New()
+			w := a.NewWindow("Error")
+			w.Resize(fyne.NewSize(200, 100))
+			w.SetContent(widget.NewLabel("Количество запросов превышено. Пожалуйста, попробуйте позднее!"))
+			w.ShowAndRun()
+		}
+		return
 	}
 
 	err = data.SavePosters(movies)
