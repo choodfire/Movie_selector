@@ -1,4 +1,4 @@
-module go_gui
+module Movie_selector
 
 go 1.18
 
